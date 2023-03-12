@@ -10,9 +10,7 @@ allow_types = ["t2.small", "t2.small", "t2.small"]
 instances = filter tfplan.resource_changes as _, rc {
 	rc.type is "fakewebservices_server" and 
 	rc.mode is "managed" and
-	(rc.change.actions contains "create" or
-	 rc.change.actions is ["update"]
-	)
+	(rc.change.actions contains "create" or rc.change.actions is ["update"])
 }
 
 instance_type = rule {
