@@ -23,6 +23,6 @@ instance_type = rule {
 
 
 # Main rule
-Main = rule {
+main = rule {
     instance_type else false
 }
