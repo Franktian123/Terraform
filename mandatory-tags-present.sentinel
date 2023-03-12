@@ -1,0 +1,67 @@
+import "tfplan/v2" as tfplan
+import "types"
+
+param actions default [
+	["no-op"],
+	["create"],
+	["update"],
+]
+
+param required_tag_key default "Environment"
+
+param required_tag_values default [
+	"staging",
+	"production",
+	"development",
+]
+
+# Get ec2 resources from plan
+ec2_instances = filter tfplan.resource_changes as _, rc {
+	rc.type is "aws_instance" and
+		rc.mode is "managed" and
+		rc.change.actions in actions
+}
+
+# Takes a list of instances and returns a map containing key/value violations
+find_env_tags_violations = func(resources, required_tag_names, required_tag_values) {
+	key_violations = filter resources as r { resources[r].change.after.tags_all not contains required_tag_key }
+	value_violations = filter resources as r {
+		resources[r].change.after.tags_all[required_tag_key] not in required_tag_values
+	}
+	return {"key_violations": key_violations else "", "value_violations": value_violations else ""}
+}
+
+# Takes a map of violations as returned by find_env_tags_violations
+# prints tag violations and returns bool map for predicate rules
+get_violations = func(violations_map) {
+	is_compliant = {"keys": true, "values": true}
+	if length(violations_map.key_violations) > 0 {
+		print("Instance missing required key:", required_tag_key)
+		print("The required key", required_tag_key, "must be any of", required_tag_values)
+		is_compliant["keys"] = false
+	}
+	if length(violations_map.value_violations) > 0 {
+		print("Instance missing required value for required key", required_tag_key, "expected to contain any of:", required_tag_values)
+		is_compliant["values"] = false
+	}
+	return is_compliant
+}
+
+violating_instances = find_env_tags_violations(ec2_instances, required_tag_key, required_tag_values)
+tags_compliant = get_violations(violating_instances)
+
+# This rule ensures that configured mandatory tag keys are present
+# for all aws_instance resources in the terraform configuration
+required_tag_keys_compliant = rule when not tags_compliant["keys"] {
+	false
+}
+
+# This rule ensures that configured mandatory tag values are present
+# for all aws_instance resources in the terraform configuration
+required_tag_values_compliant = rule when not tags_compliant["values"] {
+	false
+}
+
+main = rule {
+	required_tag_keys_compliant and required_tag_values_compliant
+}
