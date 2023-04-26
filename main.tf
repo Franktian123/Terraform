@@ -7,28 +7,10 @@ terraform {
   }
 }
 
-#Integrate with Terraform Cloud
-terraform {
-  cloud {
-    hostname = "app.terraform.io"
-    organization = "example-org-041d90"
-
-    workspaces {
-      name = "getting-started"
-    }
-  }
-}
-
-# Configure the Provider
-variable "provider_token" {
-  type = string
-  sensitive = true
-}
-
-# Configure the AWS Provider
 provider "aws" {
-  token = var.provider_token
   region = "us-east-1"
+  access_key = "AKIA5JPR35OHWVHBXD73"
+  secret_key = "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"
 }
 
 # Create a VPC
