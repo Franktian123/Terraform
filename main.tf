@@ -7,8 +7,27 @@ terraform {
   }
 }
 
+#Integrate with Terraform Cloud
+terraform {
+  cloud {
+    hostname = "app.terraform.io"
+    organization = "example-org-041d90"
+
+    workspaces {
+      name = "getting-started"
+    }
+  }
+}
+
+# Configure the Provider
+variable "provider_token" {
+  type = string
+  sensitive = true
+}
+
 # Configure the AWS Provider
 provider "aws" {
+  token = var.provider_token
   region = "us-east-1"
 }
 
