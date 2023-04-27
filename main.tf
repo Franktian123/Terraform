@@ -128,11 +128,12 @@ resource "aws_launch_configuration" "as_conf" {
   image_id      = data.aws_ami.ubuntu.id
   instance_type = "t2.micro"
 
-metadata_options {
+  metadata_options {
     http_endpoint               = "enabled"
     http_tokens                 = "required"
     http_put_response_hop_limit = 1
-  options {
+    options {
       instance_metadata_tags = "enabled"
+    }
   }
 }
