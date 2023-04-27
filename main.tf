@@ -132,8 +132,5 @@ resource "aws_launch_configuration" "as_conf" {
     http_endpoint               = "enabled"
     http_tokens                 = "required"
     http_put_response_hop_limit = 1
-    options {
-      instance_metadata_tags = "enabled"
-    }
   }
 }
