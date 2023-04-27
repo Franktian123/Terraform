@@ -9,8 +9,8 @@ terraform {
 
 provider "aws" {
   region = "us-east-1"
-  access_key = "123"
-  secret_key = "123"
+  access_key = "AKIA5JPR35OHWVHBXD73"
+  secret_key = "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"
 }
 
 # Create a VPC
@@ -35,6 +35,21 @@ resource "aws_instance" "ubuntu" {
 
   tags = {
     Name = "HelloWorld"
+  }
+}
+
+
+# Create ElasticSearch Domain
+resource "aws_elasticsearch_domain" "example" {
+  domain_name           = "example"
+  elasticsearch_version = "7.10"
+
+  cluster_config {
+    instance_type = "r4.large.elasticsearch"
+  }
+
+  tags = {
+    Domain = "TestDomain"
   }
 }
 
