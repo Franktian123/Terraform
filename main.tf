@@ -9,8 +9,8 @@ terraform {
 
 provider "aws" {
   region = "us-east-1"
-  access_key = "123"
-  secret_key = "123"
+  access_key = "AKIA5JPR35OHWVHBXD73"
+  secret_key = "nhTTDzcf/sj1dY1yZo7BqUzZt7YE57JdU0CMs/pe"
 }
 
 # Create a VPC
@@ -46,6 +46,13 @@ resource "aws_elasticsearch_domain" "example" {
 
   cluster_config {
     instance_type = "r4.large.elasticsearch"
+  }
+
+  domain_endpoint_options = {
+    enforce_https                   = true
+    custom_endpoint_enabled         = true
+    custom_endpoint                 = "lgallardo.com"
+    custom_endpoint_certificate_arn = "arn:aws:acm:us-east-1:123456789101:certificate/abcd1234-ef11-abcd-1234-abcd1234efef"
   }
 
   tags = {
