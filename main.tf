@@ -9,8 +9,8 @@ terraform {
 
 provider "aws" {
   region = "us-east-1"
-  access_key = "123"
-  secret_key = "123"
+  access_key = "AKIA5JPR35OHWVHBXD73"
+  secret_key = "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"
 }
 
 # Create a VPC
@@ -133,4 +133,18 @@ resource "aws_launch_configuration" "as_conf" {
     http_tokens                 = "required"
     http_put_response_hop_limit = 1
   }
+}
+
+
+# Create RDS
+resource "aws_db_instance" "default" {
+  allocated_storage    = 10
+  db_name              = "test_mydb"
+  engine               = "mysql"
+  engine_version       = "5.7"
+  instance_class       = "db.t3.micro"
+  username             = "foo"
+  password             = "foobarbaz"
+  parameter_group_name = "default.mysql5.7"
+  skip_final_snapshot  = true
 }
