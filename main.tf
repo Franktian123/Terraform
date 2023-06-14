@@ -140,15 +140,6 @@ data "aws_iam_policy_document" "sns_topic_policy" {
       "SNS:AddPermission",
     ]
 
-    condition {
-      test     = "StringEquals"
-      variable = "AWS:SourceOwner"
-
-      values = [
-        "${var.account-id}",
-      ]
-    }
-
     effect = "Allow"
 
     principals {
@@ -157,7 +148,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
     }
 
     resources = [
-      "${aws_sns_topic.test.arn}",
+      "*",
     ]
 
     sid = "__default_statement_ID"
@@ -171,12 +162,6 @@ resource "aws_sqs_queue" "sqs_queue" {
   max_message_size          = 2048
   message_retention_seconds = 86400
   receive_wait_time_seconds = 10
-  kms_master_key_id         = aws_kms_key.primary.arn
-
-  depends_on = [
-    aws_s3_bucket.cloudtrailbucket,
-    aws_kms_key.primary
-  ]
 }
 
 resource "aws_sqs_queue_policy" "sqs_queue_policy" {
@@ -284,7 +269,7 @@ resource "aws_ecr_repository_policy" "foopolicy" {
 resource "aws_cognito_user_pool" "test-passpolicy" {
   # current
   admin_create_user_config {
-    unused_account_validity_days = 7
+    name = "mypool"
   }
   # proposed
   password_policy {
