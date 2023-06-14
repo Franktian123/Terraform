@@ -105,7 +105,7 @@ resource "aws_sns_topic" "test-sns" {
                      Principal = {
                          Service = "events.amazonaws.com"
                      }
-                     Resource  = aws_sns_topic.gd_sns_topic.arn
+                     Resource  = "*"
                      Sid       = "SID-GD-Example"
                  },
              ]
