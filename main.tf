@@ -11,138 +11,35 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# Create a VPC
-resource "aws_vpc" "example" {
-  cidr_block = "10.0.0.0/16"
+# 1. for Ensure permissions are tightly controlled for AWS ElasticSearch Domains
+
+variable "domain" {
+  default = "tf-test"
 }
 
+data "aws_region" "current" {}
 
-# Create variable
-variable "ami_id" {
-  default = "ami-2e1ef954"
-}
+data "aws_caller_identity" "current" {}
 
-variable "instance_type" {
-  default = "t2.micro"
-}
-
-# Create a instance
-resource "aws_instance" "ubuntu" {
-  ami           = "${var.ami_id}"
-  instance_type = "${var.instance_type}"
-
-  tags = {
-    Name = "HelloWorld"
-  }
-}
-
-
-# Create ElasticSearch Domain
 resource "aws_elasticsearch_domain" "example" {
-  domain_name           = "example"
-  elasticsearch_version = "7.10"
+  domain_name = var.domain
 
-  cluster_config {
-    instance_type = "r4.large.elasticsearch"
-  }
+  # ... other configuration ...
 
-  advanced_security_options {
-    enabled = true
-  }
-  
-  domain_endpoint_options {
-    enforce_https = true
-  }
-
-  tags = {
-    Domain = "TestDomain"
-  }
-}
-
-# Create Lambda Function
-data "aws_iam_policy_document" "assume_role" {
-  statement {
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
+  access_policies = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "es:*",
+      "Principal": "*",
+      "Effect": "Allow",
+      "Resource": "arn:aws:es:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:domain/${var.domain}/*",
+      "Condition": {
+        "IpAddress": {"aws:SourceIp": ["66.193.100.22/32"]}
+      }
     }
-
-    actions = ["sts:AssumeRole"]
-  }
+  ]
 }
-
-resource "aws_iam_role" "iam_for_lambda" {
-  name               = "iam_for_lambda"
-  assume_role_policy = data.aws_iam_policy_document.assume_role.json
-}
-
-data "archive_file" "lambda" {
-  type        = "zip"
-  source_file = "lambda.js"
-  output_path = "lambda_function_payload.zip"
-}
-
-resource "aws_lambda_function" "test_lambda" {
-  # If the file is not in the current working directory you will need to include a
-  # path.module in the filename.
-  filename      = "lambda_function_payload.zip"
-  function_name = "lambda_function_name"
-  role          = aws_iam_role.iam_for_lambda.arn
-  handler       = "index.test"
-
-  source_code_hash = data.archive_file.lambda.output_base64sha256
-
-  runtime = "nodejs16.x"
-
-  environment {
-    variables = {
-      foo = "bar"
-    }
-  }
-}
-
-
-# Create Launch Configuration
-data "aws_ami" "ubuntu" {
-  most_recent = true
-
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-*"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  owners = ["099720109477"] # Canonical
-}
-
-resource "aws_launch_configuration" "as_conf" {
-  name          = "web_config"
-  image_id      = data.aws_ami.ubuntu.id
-  instance_type = "t2.micro"
-
-  metadata_options {
-    http_endpoint               = "enabled"
-    http_tokens                 = "required"
-    http_put_response_hop_limit = 1
-  }
-}
-
-
-# Create RDS
-resource "aws_db_instance" "default" {
-  allocated_storage    = 10
-  db_name              = "test_mydb"
-  engine               = "mysql"
-  engine_version       = "5.7"
-  instance_class       = "db.t3.micro"
-  username             = "foo"
-  password             = "foobarbaz"
-  parameter_group_name = "default.mysql5.7"
-  skip_final_snapshot  = true
+POLICY
 }
