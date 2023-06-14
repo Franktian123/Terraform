@@ -156,37 +156,30 @@ data "aws_iam_policy_document" "sns_topic_policy" {
 }
 
 # 5. Ensure Amazon Simple Queue Service (SQS) is not exposed to public
-resource "aws_sqs_queue" "sqs_queue" {
-  name                      = "terraform-example-queue"
-  delay_seconds             = 90
-  max_message_size          = 2048
-  message_retention_seconds = 86400
-  receive_wait_time_seconds = 10
+
+resource "aws_sqs_queue" "mysqs" {
+  name = "test-sqs"
 }
 
-resource "aws_sqs_queue_policy" "sqs_queue_policy" {
-  queue_url = aws_sqs_queue.sqs_queue.id
+resource "aws_sqs_queue_policy" "test" {
+  queue_url = "${aws_sqs_queue.mysqs.id}"
+
   policy = <<POLICY
 {
   "Version": "2012-10-17",
   "Id": "sqspolicy",
   "Statement": [
     {
-      "Sid": "CloudTrailSQS",
+      "Sid": "First",
       "Effect": "Allow",
-      "Principal": {
-          "Service": "s3.amazonaws.com"
-      },
-      "Action": [
-          "SQS:SendMessage"
-      ],
+      "Principal": "*",
+      "Action": "sqs:SendMessage",
       "Resource": "*",
     }
   ]
 }
 POLICY
 }
-
 
 # 6. Ensure there are no public file systems for AWS Elastic File System (EFS)
 
