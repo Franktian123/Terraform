@@ -284,7 +284,7 @@ resource "aws_ecr_repository_policy" "foopolicy" {
 resource "aws_cognito_user_pool" "test-passpolicy" {
   # current
   admin_create_user_config {
-    unused_account_validity_days: 7
+    unused_account_validity_days = 7
   }
   # proposed
   password_policy {
