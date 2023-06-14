@@ -166,7 +166,7 @@ resource "aws_sqs_queue" "sqs_queue" {
 
 resource "aws_sqs_queue_policy" "sqs_queue_policy" {
   queue_url = aws_sqs_queue.sqs_queue.id
-  policy    = <<POLICY
+  policy = <<POLICY
 {
   "Version": "2012-10-17",
   "Id": "sqspolicy",
