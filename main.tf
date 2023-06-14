@@ -288,11 +288,11 @@ resource "aws_cognito_user_pool" "test-passpolicy" {
   }
   # proposed
   password_policy {
-    temporary_password_validity_days: 7
-    minimum_length: 7
-    require_uppercase: true
-    require_lowercase: true
-    require_numbers: true
-    require_symbols: true
+    temporary_password_validity_days = 7
+    minimum_length = 7
+    require_uppercase = true
+    require_lowercase = true
+    require_numbers = true
+    require_symbols = true
   }
 }
