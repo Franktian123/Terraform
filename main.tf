@@ -157,7 +157,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
 
 # 5. Ensure Amazon Simple Queue Service (SQS) is not exposed to public
 resource "aws_sqs_queue" "sqs_queue" {
-  name                      = test-sqs
+  name                      = "terraform-example-queue"
   delay_seconds             = 90
   max_message_size          = 2048
   message_retention_seconds = 86400
@@ -268,9 +268,7 @@ resource "aws_ecr_repository_policy" "foopolicy" {
 
 resource "aws_cognito_user_pool" "test-passpolicy" {
   # current
-  admin_create_user_config {
-    name  = "test_cognito_passpolicy"
-  }
+  name = "mypool-test"
   # proposed
   password_policy {
     temporary_password_validity_days = 7
